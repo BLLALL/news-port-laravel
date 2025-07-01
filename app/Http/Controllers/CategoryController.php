@@ -13,7 +13,10 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+        $categories = Category::with('articles')->get();
+        $categoryTree = (new Category)->buildTree($categories);
+
+        return view('home', ['categoryTree' => $categoryTree]);
     }
 
     /**
@@ -37,7 +40,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        //
+        return view('categories.show', ['category' => $category]);
     }
 
     /**

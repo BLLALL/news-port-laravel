@@ -10,11 +10,18 @@
                     </a>
                 </div>
 
+            @auth
+                
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                        {{ __('Home') }}
                     </x-nav-link>
+                    <?php  if (auth()->user()->is_admin): ?>
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Admin Panel') }}
+                    </x-nav-link>               
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -61,6 +68,7 @@
                     </svg>
                 </button>
             </div>
+            @endauth
         </div>
     </div>
 
@@ -72,6 +80,8 @@
             </x-responsive-nav-link>
         </div>
 
+        @auth
+            
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
             <div class="px-4">
@@ -96,5 +106,7 @@
                 </form>
             </div>
         </div>
+        @endauth
+
     </div>
 </nav>

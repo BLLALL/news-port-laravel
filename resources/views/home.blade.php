@@ -1,0 +1,47 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('News Portal') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+
+                    <div class="mb-8">
+                        <h3 class="text-2xl font-bold mb-4">Browse by Categories</h3>
+                        <div class="p-4 border rounded-lg dark:border-gray-700">
+                            @include('partials.category-tree', ['categories' => $categoryTree])
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4">Latest News</h3>
+                        
+                        <form method="GET" action="{{ route('home') }}" class="mb-8">
+                            <div class="p-4 border rounded-lg dark:border-gray-700">
+                                <strong class="block mb-2">Filter by Category:</strong>
+                                @include('partials.category-filter', ['categories' => $categoryTree, 'selected' => $selectedCategories])
+                                <div class="mt-4">
+                                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md">Apply Filter</button>
+                                    <a href="{{ route('home') }}" class="px-4 py-2 bg-gray-600 text-white rounded-md">Clear All</a>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            @forelse ($latestNews as $article)
+                                @include('partials.news-card', ['article' => $article])
+                            @empty
+                                <p>No articles found.</p>
+                            @endforelse
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
