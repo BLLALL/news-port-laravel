@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Article;
+use App\Models\Category;
+use Illuminate\Http\Request;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
-use App\Models\Category;
 
 class CategoryController extends Controller
 {
@@ -35,12 +37,60 @@ class CategoryController extends Controller
         //
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Category $category)
+     public function show(Category $category, Request $request)
     {
-        return view('categories.show', ['category' => $category]);
+        // Get all categories for the tree structure
+        $allCategories = Category::with('articles')->get();
+        $categoryTree = Category::buildTree($allCategories);
+        
+        // Simple approach: just get articles directly attached to this category
+        $query = Article::with(['author', 'categories'])
+            ->whereHas('categories', function ($q) use ($category) {
+                $q->where('categories.id', $category->id);
+            })
+            ->latest('created_at'); // or published_at if you have that column
+            
+        // Add search functionality if search parameter exists
+        if ($request->has('search') && !empty($request->search)) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                  ->orWhere('content', 'like', "%{$searchTerm}%");
+            });
+        }
+        
+        // Paginate results
+        $articles = $query->paginate(12)->withQueryString();
+        
+        // Get subcategories with article counts
+        $subcategories = $category->children()->with('articles')->get();
+        
+        // Get category path (breadcrumbs)
+        $categoryPath = $this->getCategoryPath($category);
+        
+        return view('categories.show', compact(
+            'category', 
+            'articles', 
+            'subcategories', 
+            'categoryTree',
+            'categoryPath'
+        ));
+    }
+    
+    /**
+     * Get the category path for breadcrumbs
+     */
+    private function getCategoryPath(Category $category)
+    {
+        $path = collect([$category]);
+        $current = $category;
+        
+        while ($current->parent) {
+            $current = $current->parent;
+            $path->prepend($current);
+        }
+        
+        return $path;
     }
 
     /**
