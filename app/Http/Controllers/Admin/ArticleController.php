@@ -32,7 +32,7 @@ class ArticleController extends Controller
             'categories.*' => 'exists:categories,id',
         ]);
 
-        $data = $request->only(['title', 'content']); // Only get allowed fields
+        $data = $request->only(['title', 'content']); 
         $data['author_id'] = auth()->id();
 
         if ($request->hasFile('image')) {
@@ -61,6 +61,7 @@ class ArticleController extends Controller
             'categories' => 'required|array|min:1',
             'categories.*' => 'exists:categories,id',
         ]);
+
 
         $data = $request->only(['title', 'content']); // Only get allowed fields
 

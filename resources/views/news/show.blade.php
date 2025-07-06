@@ -47,7 +47,7 @@
             
             <!-- Article Header -->
             <article class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 overflow-hidden mb-8">
-                
+
                 <!-- Featured Image -->
                 @if($article->image)
                     <div class="relative h-96 overflow-hidden">

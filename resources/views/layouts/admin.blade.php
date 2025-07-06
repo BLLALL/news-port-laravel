@@ -13,6 +13,9 @@
 
         <title>{{ isset($title) ? $title . ' - ' : '' }}Admin Panel - {{ config('app.name', 'Laravel') }}</title>
 
+        <!-- Favicon -->
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cdefs%3E%3ClinearGradient id='logoGradient' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%233B82F6;stop-opacity:1' /%3E%3Cstop offset='50%25' style='stop-color:%236366F1;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%238B5CF6;stop-opacity:1' /%3E%3C/linearGradient%3E%3ClinearGradient id='paperGradient' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23FFFFFF;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23F8FAFC;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='60' cy='60' r='56' fill='url(%23logoGradient)'/%3E%3Ccircle cx='60' cy='60' r='52' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='1'/%3E%3Crect x='25' y='30' width='70' height='60' rx='4' ry='4' fill='url(%23paperGradient)'/%3E%3Crect x='30' y='38' width='60' height='4' rx='2' fill='%231F2937'/%3E%3Crect x='30' y='46' width='45' height='2' rx='1' fill='%236B7280'/%3E%3Crect x='30' y='50' width='35' height='2' rx='1' fill='%236B7280'/%3E%3Crect x='30' y='58' width='25' height='2' rx='1' fill='%239CA3AF'/%3E%3Crect x='30' y='62' width='28' height='2' rx='1' fill='%239CA3AF'/%3E%3Crect x='30' y='66' width='22' height='2' rx='1' fill='%239CA3AF'/%3E%3Crect x='30' y='70' width='26' height='2' rx='1' fill='%239CA3AF'/%3E%3Crect x='62' y='58' width='25' height='2' rx='1' fill='%239CA3AF'/%3E%3Crect x='62' y='62' width='23' height='2' rx='1' fill='%239CA3AF'/%3E%3Crect x='62' y='66' width='28' height='2' rx='1' fill='%239CA3AF'/%3E%3Crect x='62' y='70' width='20' height='2' rx='1' fill='%239CA3AF'/%3E%3Crect x='78' y='75' width='12' height='8' rx='2' fill='%23EF4444'/%3E%3Ctext x='84' y='80.5' font-family='Arial, sans-serif' font-size='5' font-weight='bold' text-anchor='middle' fill='white'%3EN%3C/text%3E%3Ccircle cx='85' cy='35' r='3' fill='%2310B981'/%3E%3Ccircle cx='85' cy='35' r='2' fill='%2334D399' opacity='0.8'/%3E%3Crect x='25' y='30' width='70' height='60' rx='4' ry='4' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='1'/%3E%3C/svg%3E">
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
@@ -44,39 +47,33 @@
                             Dashboard
                         </a>
 
-                        <!-- Articles -->
-                        <div x-data="{ open: {{ request()->routeIs('admin.articles.*') ? 'true' : 'false' }} }">
-                            <button @click="open = !open" 
-                                    class="flex items-center justify-between w-full px-4 py-3 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('admin.articles.*') ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : '' }}">
-                                <div class="flex items-center">
-                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    Articles
-                                </div>
-                                <svg class="w-4 h-4 transform transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                </svg>
-                            </button>
-                            <div x-show="open" x-transition class="ml-8 mt-2 space-y-2">
-                                <a href="{{ route('admin.articles.index') }}" 
-                                   class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 {{ request()->routeIs('admin.articles.index') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
-                                    All Articles
-                                </a>
-                                <a href="{{ route('admin.articles.create') }}" 
-                                   class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 {{ request()->routeIs('admin.articles.create') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
-                                    Create Article
-                                </a>
-                                <a href="{{ route('admin.articles.index', ['status' => 'draft']) }}" 
-                                   class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    Drafts
-                                </a>
-                                <a href="{{ route('admin.articles.index', ['status' => 'published']) }}" 
-                                   class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    Published
-                                </a>
-                            </div>
+                      <!-- resources/views/layouts/admin.blade.php - Update the Articles navigation section -->
+
+                <!-- Articles -->
+                <div x-data="{ open: {{ request()->routeIs('admin.articles.*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" 
+                            class="flex items-center justify-between w-full px-4 py-3 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('admin.articles.*') ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : '' }}">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Articles
                         </div>
+                        <svg class="w-4 h-4 transform transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-transition class="ml-8 mt-2 space-y-2">
+                        <a href="{{ route('admin.articles.index') }}" 
+                        class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 {{ request()->routeIs('admin.articles.index') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
+                            All Articles
+                        </a>
+                        <a href="{{ route('admin.articles.create') }}" 
+                        class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 {{ request()->routeIs('admin.articles.create') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
+                            Create Article
+                        </a>
+                    </div>
+                </div>
 
                         <!-- Categories -->
                         <div x-data="{ open: {{ request()->routeIs('admin.categories.*') ? 'true' : 'false' }} }">
@@ -150,17 +147,6 @@
 
                         <!-- Right Side -->
                         <div class="flex items-center space-x-4">
-                            <!-- Dark Mode Toggle -->
-                            <button @click="darkMode = !darkMode" 
-                                    class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                <svg x-show="!darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-                                </svg>
-                                <svg x-show="darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                                </svg>
-                            </button>
-
                             <!-- User Dropdown -->
                             <x-dropdown align="right" width="48">
                                 <x-slot name="trigger">

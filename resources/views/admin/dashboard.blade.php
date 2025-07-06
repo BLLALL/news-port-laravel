@@ -1,10 +1,12 @@
-{{-- resources/views/admin/dashboard.blade.php --}}
+{{-- resources/views/admin/dashboard.blade.php - Fix button spacing --}}
 
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Admin Dashboard') }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                {{ __('Admin Dashboard') }}
+            </h2>
+        </div>
     </x-slot>
 
     <div class="py-12">
@@ -35,7 +37,9 @@
             <!-- Quick Actions -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-8">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Quick Actions</h3>
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Quick Actions</h3>
+                    </div>
                     <div class="flex flex-wrap gap-4">
                         <a href="{{ route('admin.articles.create') }}" 
                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
