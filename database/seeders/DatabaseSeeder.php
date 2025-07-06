@@ -1,4 +1,5 @@
 <?php
+
 // database/seeders/DatabaseSeeder.php (replace existing)
 
 namespace Database\Seeders;
@@ -23,7 +24,7 @@ class DatabaseSeeder extends Seeder
         // Create regular user
         User::create([
             'name' => 'test user',
-            'email' => 'test@example.com', 
+            'email' => 'test@example.com',
             'password' => Hash::make('password'),
             'is_admin' => false,
             'email_verified_at' => now(),

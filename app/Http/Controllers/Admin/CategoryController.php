@@ -14,7 +14,7 @@ class CategoryController extends Controller
         $query = Category::withCount('articles');
 
         // Search functionality
-        if ($request->has('search') && !empty($request->search)) {
+        if ($request->has('search') && ! empty($request->search)) {
             $query->where('name', 'like', "%{$request->search}%");
         }
 
@@ -39,7 +39,7 @@ class CategoryController extends Controller
         $parentCategories = Category::orderBy('parent_id')
             ->orderBy('name')
             ->get();
-            
+
         return view('admin.categories.create', compact('parentCategories'));
     }
 
@@ -60,6 +60,7 @@ class CategoryController extends Controller
     public function show(Category $category)
     {
         $category->load(['parent', 'children', 'articles']);
+
         return view('admin.categories.show', compact('category'));
     }
 
@@ -69,7 +70,7 @@ class CategoryController extends Controller
             ->orderBy('parent_id')
             ->orderBy('name')
             ->get();
-        
+
         return view('admin.categories.edit', compact('category', 'parentCategories'));
     }
 
@@ -81,14 +82,14 @@ class CategoryController extends Controller
             'parent_id' => [
                 'nullable',
                 'exists:categories,id',
-                Rule::notIn([$category->id])
+                Rule::notIn([$category->id]),
             ],
         ]);
 
         if ($validated['parent_id']) {
             $descendants = $category->getAllDescendants();
             $descendantIds = $descendants->pluck('id')->toArray();
-            
+
             if (in_array($validated['parent_id'], $descendantIds)) {
                 return back()->withErrors(['parent_id' => 'Cannot make a descendant category the parent (would create circular reference).'])->withInput();
             }

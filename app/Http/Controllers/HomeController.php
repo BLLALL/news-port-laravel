@@ -21,26 +21,26 @@ class HomeController extends Controller
     {
         $allCategories = Category::with('articles')->get();
         $categoryTree = Category::buildTree($allCategories);
-        
+
         $selectedCategories = $request->input('categories', []);
 
         $query = Article::with(['author', 'categories'])
             ->latest('created_at');
 
-        if (!empty($selectedCategories)) {
-            if (!is_array($selectedCategories)) {
+        if (! empty($selectedCategories)) {
+            if (! is_array($selectedCategories)) {
                 $selectedCategories = [$selectedCategories];
             }
-            
+
             $categoryIds = [];
             foreach ($selectedCategories as $catId) {
                 $categoryIds[] = $catId;
                 $descendantIds = $this->categoryService->getDescendantsIds($allCategories, $catId);
                 $categoryIds = array_merge($categoryIds, $descendantIds);
             }
-            
+
             $categoryIds = array_unique($categoryIds);
-            
+
             log::info('Selected categories IDs:', ['ids' => $categoryIds]);
             $query->whereHas('categories', function ($q) use ($categoryIds) {
                 $q->whereIn('categories.id', $categoryIds);
@@ -48,7 +48,7 @@ class HomeController extends Controller
         }
 
         $latestNews = $query->take(12)->get();
-        
+
         Log::info('Number of articles found:', ['count' => $latestNews->count()]);
 
         return view('home', [

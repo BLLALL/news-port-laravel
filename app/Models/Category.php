@@ -11,10 +11,10 @@ class Category extends Model
 
     protected $fillable = [
         'name',
-        'color', 
-        'parent_id'
+        'color',
+        'parent_id',
     ];
-    
+
     protected $appends = ['articles_count'];
 
     public function parent()
@@ -41,12 +41,12 @@ class Category extends Model
     {
         $path = collect([$this]);
         $current = $this;
-        
+
         while ($current->parent) {
             $current = $current->parent;
             $path->prepend($current);
         }
-        
+
         return $path->pluck('name')->implode(' > ');
     }
 
@@ -66,6 +66,7 @@ class Category extends Model
         while ($current->parent) {
             $current = $current->parent;
         }
+
         return $current;
     }
 
@@ -78,7 +79,7 @@ class Category extends Model
 
     public static function buildTree($categories = null, $parentId = null)
     {
-        if (!$categories) {
+        if (! $categories) {
             $categories = static::all();
         }
 
@@ -100,12 +101,12 @@ class Category extends Model
     public function getAllDescendants()
     {
         $descendants = collect();
-        
+
         foreach ($this->children as $child) {
             $descendants->push($child);
             $descendants = $descendants->merge($child->getAllDescendants());
         }
-        
+
         return $descendants;
     }
 
@@ -113,12 +114,12 @@ class Category extends Model
     {
         $depth = 0;
         $current = $this;
-        
+
         while ($current->parent) {
             $depth++;
             $current = $current->parent;
         }
-        
+
         return $depth;
     }
 

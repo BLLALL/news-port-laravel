@@ -1,4 +1,5 @@
 <?php
+
 // database/migrations/2025_07_02_150001_create_category_parents_table.php
 
 use Illuminate\Database\Migrations\Migration;

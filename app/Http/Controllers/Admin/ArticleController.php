@@ -1,4 +1,5 @@
 <?php
+
 // app/Http/Controllers/Admin/ArticleController.php
 
 namespace App\Http\Controllers\Admin;
@@ -13,12 +14,14 @@ class ArticleController extends Controller
     public function index()
     {
         $articles = Article::with(['author', 'categories'])->latest()->paginate(15);
+
         return view('admin.articles.index', compact('articles'));
     }
 
     public function create()
     {
         $categories = Category::all();
+
         return view('admin.articles.create', compact('categories'));
     }
 
@@ -32,7 +35,7 @@ class ArticleController extends Controller
             'categories.*' => 'exists:categories,id',
         ]);
 
-        $data = $request->only(['title', 'content']); 
+        $data = $request->only(['title', 'content']);
         $data['author_id'] = auth()->id();
 
         if ($request->hasFile('image')) {
@@ -49,6 +52,7 @@ class ArticleController extends Controller
     {
         $categories = Category::all();
         $article->load('categories');
+
         return view('admin.articles.edit', compact('article', 'categories'));
     }
 
@@ -61,7 +65,6 @@ class ArticleController extends Controller
             'categories' => 'required|array|min:1',
             'categories.*' => 'exists:categories,id',
         ]);
-
 
         $data = $request->only(['title', 'content']); // Only get allowed fields
 

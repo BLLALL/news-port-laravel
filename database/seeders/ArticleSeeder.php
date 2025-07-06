@@ -56,11 +56,11 @@ class ArticleSeeder extends Seeder
 
         // Find the category by name
         $category = Category::where('name', $categoryName)->first();
-        
+
         if ($category) {
             // Get all parent categories
             $categoriesToAttach = $this->getCategoryHierarchy($category);
-            
+
             // Attach to all categories in the hierarchy
             $article->categories()->attach($categoriesToAttach->pluck('id'));
         }
@@ -75,12 +75,12 @@ class ArticleSeeder extends Seeder
     {
         $hierarchy = collect([$category]);
         $current = $category;
-        
+
         while ($current->parent) {
             $current = $current->parent;
             $hierarchy->push($current);
         }
-        
+
         return $hierarchy;
     }
 }

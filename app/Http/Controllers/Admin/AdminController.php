@@ -1,4 +1,5 @@
 <?php
+
 // app/Http/Controllers/Admin/AdminController.php
 
 namespace App\Http\Controllers\Admin;
@@ -10,8 +11,6 @@ use App\Models\User;
 
 class AdminController extends Controller
 {
-
-
     public function dashboard()
     {
         $stats = [
