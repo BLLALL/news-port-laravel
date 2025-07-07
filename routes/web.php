@@ -5,6 +5,7 @@
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,24 @@ Route::get('/categories/{category}', [CategoryController::class, 'show'])->name(
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+// Newsletter routes
+Route::prefix('newsletter')->name('newsletter.')->group(function () {
+    // Subscribe to newsletter
+    Route::post('/subscribe', [NewsletterController::class, 'subscribe'])->name('subscribe');
+
+    // Unsubscribe from newsletter
+    Route::get('/unsubscribe', [NewsletterController::class, 'showUnsubscribeForm'])->name('unsubscribe.form');
+    Route::post('/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('unsubscribe');
+
+    // Email verification (for future use)
+    Route::get('/verify/{token}', [NewsletterController::class, 'verify'])->name('verify');
+
+    // Newsletter statistics (for admin/monitoring)
+    Route::get('/stats', [NewsletterController::class, 'stats'])
+        ->middleware(['auth', 'admin'])
+        ->name('stats');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -36,6 +55,21 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', \App\Http\Middleware
 
     // Articles
     Route::resource('articles', App\Http\Controllers\Admin\ArticleController::class);
+
+    Route::prefix('newsletter')->name('newsletter.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\NewsletterController::class, 'index'])->name('index');
+        Route::get('/export', [App\Http\Controllers\Admin\NewsletterController::class, 'export'])->name('export');
+        Route::post('/bulk-action', [App\Http\Controllers\Admin\NewsletterController::class, 'bulkAction'])->name('bulk-action');
+    });
+});
+
+Route::prefix('newsletter')->name('newsletter.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\NewsletterController::class, 'index'])->name('index');
+    Route::get('/settings', [App\Http\Controllers\Admin\NewsletterController::class, 'settings'])->name('settings');
+    Route::get('/export', [App\Http\Controllers\Admin\NewsletterController::class, 'export'])->name('export');
+    Route::post('/bulk-action', [App\Http\Controllers\Admin\NewsletterController::class, 'bulkAction'])->name('bulk-action');
+    Route::post('/send-test', [App\Http\Controllers\Admin\NewsletterController::class, 'sendTestNewsletter'])->name('send-test');
+    Route::post('/send-article', [App\Http\Controllers\Admin\NewsletterController::class, 'sendNewsletterForArticle'])->name('send-article');
 });
 
 require __DIR__.'/auth.php';

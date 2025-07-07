@@ -11,7 +11,7 @@
         @else
             <!-- Placeholder with dynamic gradient based on first category color -->
             @php
-                $primaryColor = $article->categories->first()->color ?? '#667eea';
+                $primaryColor = $article->categories->first()->color ?? '#000000';
                 $secondaryColor = '#' . substr(md5($article->title), 0, 6);
             @endphp
             <a href="{{ route('news.show', $article) }}" class="block h-full">

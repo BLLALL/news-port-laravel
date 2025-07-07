@@ -4,13 +4,22 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use App\Services\NewsletterEmailService;
 
 class ArticleController extends Controller
 {
+    protected $newsletterEmailService;
+
+    public function __construct(NewsletterEmailService $newsletterEmailService)
+    {
+        $this->newsletterEmailService = $newsletterEmailService;
+    }
+
     public function index()
     {
         $articles = Article::with(['author', 'categories'])->latest()->paginate(15);
@@ -45,7 +54,44 @@ class ArticleController extends Controller
         $article = Article::create($data);
         $article->categories()->attach(array_unique($request->categories));
 
-        return redirect()->route('admin.articles.index')->with('success', 'Article created successfully!');
+        $article->load(['author', 'categories']);
+
+        // Check if newsletter should be sent (default: true)
+        $sendNewsletter = $request->input('send_newsletter', true);
+        $newsletterMessage = '';
+
+        if ($sendNewsletter) {
+            try {
+                // Send newsletter using the service
+                $newsletterSent = $this->newsletterEmailService->sendNewArticleNewsletter($article);
+
+                if ($newsletterSent) {
+                    $newsletterMessage = ' Newsletter has been queued and will be sent to subscribers shortly.';
+
+                    Log::info('Newsletter queued for article', [
+                        'article_id' => $article->id,
+                        'article_title' => $article->title,
+                        'author_id' => auth()->id(),
+                    ]);
+                } else {
+                    $newsletterMessage = ' However, the newsletter could not be sent. Please check the logs.';
+                }
+            } catch (\Exception $e) {
+                $newsletterMessage = ' However, there was an error sending the newsletter: '.$e->getMessage();
+
+                Log::error('Error sending newsletter for article', [
+                    'article_id' => $article->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        } else {
+            $newsletterMessage = ' Newsletter was not sent as requested.';
+        }
+
+        // 4. SUCCESS RESPONSE - Enhanced with newsletter status
+        $successMessage = 'Article "'.$article->title.'" created successfully!'.$newsletterMessage;
+
+        return redirect()->route('admin.articles.index')->with('success', $successMessage);
     }
 
     public function edit(Article $article)

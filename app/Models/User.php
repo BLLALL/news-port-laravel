@@ -3,13 +3,13 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Notifications\QueuedVerifyEmailNotification;
 use App\Notifications\QueuedResetPasswordNotification;
+use App\Notifications\QueuedVerifyEmailNotification;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements MustVerifyEmail, ShouldQueue
 {
@@ -53,7 +53,7 @@ class User extends Authenticatable implements MustVerifyEmail, ShouldQueue
 
     public function sendEmailVerificationNotification()
     {
-        $this->notify(new QueuedVerifyEmailNotification());
+        $this->notify(new QueuedVerifyEmailNotification);
     }
 
     public function sendPasswordResetNotification($token)

@@ -121,6 +121,55 @@
                 </header>
             @endif
 
+            <!-- Newsletter Flash Messages (Global) -->
+            @if (session('newsletter_success'))
+                <div class="bg-green-500 text-white text-center py-3 px-4" 
+                     x-data="{ show: true }" 
+                     x-show="show" 
+                     x-init="setTimeout(() => show = false, 5000)">
+                    <div class="max-w-7xl mx-auto flex items-center justify-between">
+                        <span>{{ session('newsletter_success') }}</span>
+                        <button @click="show = false" class="text-white hover:text-gray-200">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            @endif
+
+            @if (session('newsletter_error'))
+                <div class="bg-red-500 text-white text-center py-3 px-4" 
+                     x-data="{ show: true }" 
+                     x-show="show" 
+                     x-init="setTimeout(() => show = false, 5000)">
+                    <div class="max-w-7xl mx-auto flex items-center justify-between">
+                        <span>{{ session('newsletter_error') }}</span>
+                        <button @click="show = false" class="text-white hover:text-gray-200">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            @endif
+
+            @if (session('newsletter_status'))
+                <div class="bg-blue-500 text-white text-center py-3 px-4" 
+                     x-data="{ show: true }" 
+                     x-show="show" 
+                     x-init="setTimeout(() => show = false, 5000)">
+                    <div class="max-w-7xl mx-auto flex items-center justify-between">
+                        <span>{{ session('newsletter_status') }}</span>
+                        <button @click="show = false" class="text-white hover:text-gray-200">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            @endif
+
             <!-- Main Content -->
             <main class="relative">
                 {{ $slot }}
@@ -158,25 +207,76 @@
                         <div>
                             <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Links</h4>
                             <ul class="space-y-2 text-gray-600 dark:text-gray-400">
-                                <li><a href="#" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Latest News</a></li>
+                                <li><a href="{{ route('home') }}" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Latest News</a></li>
                                 <li><a href="#" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Categories</a></li>
                                 <li><a href="#" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">About Us</a></li>
                                 <li><a href="#" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Contact</a></li>
+                                <li><a href="{{ route('newsletter.unsubscribe.form') }}" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Unsubscribe</a></li>
                             </ul>
                         </div>
                         
-                        <!-- Newsletter -->
+                        <!-- Newsletter Subscription -->
                         <div>
                             <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Stay Updated</h4>
                             <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm">Subscribe to our newsletter for the latest updates.</p>
-                            <form class="space-y-2">
-                                <input type="email" placeholder="Enter your email" 
-                                       class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm text-gray-900 dark:text-gray-100">
+                            
+                            <!-- Newsletter Form -->
+                            <form action="{{ route('newsletter.subscribe') }}" method="POST" 
+                                  x-data="{ 
+                                      loading: false, 
+                                      email: '',
+                                      submit() {
+                                          this.loading = true;
+                                          this.$el.submit();
+                                      }
+                                  }" 
+                                  @submit="submit()" 
+                                  class="space-y-3">
+                                @csrf
+                                <input type="hidden" name="source" value="footer">
+                                
+                                <div class="relative">
+                                    <input type="email" 
+                                           name="email" 
+                                           x-model="email"
+                                           placeholder="Enter your email" 
+                                           required
+                                           class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm text-gray-900 dark:text-gray-100 pr-10">
+                                    
+                                    <!-- Loading Spinner -->
+                                    <div x-show="loading" 
+                                         x-transition
+                                         class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                        <svg class="w-4 h-4 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                
                                 <button type="submit" 
-                                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm">
-                                    Subscribe
+                                        :disabled="loading || !email"
+                                        :class="{ 'opacity-50 cursor-not-allowed': loading || !email }"
+                                        class="w-full bg-blue-600 hover:bg-blue-700 disabled:hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm flex items-center justify-center">
+                                    <span x-show="!loading">Subscribe</span>
+                                    <span x-show="loading" class="flex items-center">
+                                        <svg class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Subscribing...
+                                    </span>
                                 </button>
+                                
+                                @error('email')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
                             </form>
+                            
+                            <!-- Privacy Notice -->
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                                We respect your privacy. Unsubscribe at any time.
+                            </p>
                         </div>
                     </div>
                     

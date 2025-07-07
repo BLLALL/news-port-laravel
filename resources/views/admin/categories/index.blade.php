@@ -16,38 +16,6 @@
 
     <div class="bg-white dark:bg-gray-800 shadow-xl sm:rounded-lg">
         <!-- Filters -->
-        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-            <form method="GET" action="{{ route('admin.categories.index') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- Search -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
-                    <input type="text" name="search" value="{{ request('search') }}" 
-                           placeholder="Search categories..."
-                           class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                </div>
-
-                <!-- Parent Filter -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Parent Category</label>
-                    <select name="parent" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        <option value="">All Categories</option>
-                        <option value="root" {{ request('parent') === 'root' ? 'selected' : '' }}>Root Categories Only</option>
-                        @foreach($parentCategories as $parent)
-                            <option value="{{ $parent->id }}" {{ request('parent') == $parent->id ? 'selected' : '' }}>
-                                {{ $parent->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Submit -->
-                <div class="flex items-end">
-                    <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md transition-colors">
-                        Filter
-                    </button>
-                </div>
-            </form>
-        </div>
 
         <!-- Categories Table -->
         <div class="overflow-x-auto">
