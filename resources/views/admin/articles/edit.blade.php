@@ -1,5 +1,3 @@
-{{-- resources/views/admin/articles/edit.blade.php --}}
-
 <x-admin-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -32,7 +30,7 @@
                 <p class="text-green-100 text-sm mt-1">Update article information and content</p>
             </div>
 
-            <form method="POST" action="{{ route('admin.articles.update', $article) }}" enctype="multipart/form-data" class="p-6 space-y-6">
+            <form method="POST" action="{{ route('admin.articles.update', $article) }}" enctype="multipart/form-data" class="p-6 space-y-6" id="article-edit-form">
                 @csrf
                 @method('PUT')
 
@@ -53,7 +51,7 @@
                     @enderror
                 </div>
 
-                <!-- Content -->
+                <!-- Content with TinyMCE -->
                 <div>
                     <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Article Content <span class="text-red-500">*</span>
@@ -61,12 +59,14 @@
                     <textarea id="content" 
                               name="content" 
                               rows="20"
-                              required
                               placeholder="Write your article content here..."
                               class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-gray-100 transition-colors @error('content') border-red-500 @enderror">{{ old('content', $article->content) }}</textarea>
                     @error('content')
                         <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                     @enderror
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        Use the rich text editor to format your content with headings, lists, links, and more.
+                    </p>
                 </div>
 
                 <!-- Current Image Display -->
@@ -93,20 +93,6 @@
                         </div>
                     </div>
                 @endif
-
-                <!-- New Image Preview (Hidden by default) -->
-                <div id="new-image-preview-container" class="hidden">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        New Image Preview
-                    </label>
-                    <div class="relative inline-block mb-4">
-                        <img id="new-image-preview" class="w-64 h-48 object-cover rounded-lg border border-gray-300 dark:border-gray-600 shadow-lg" src="" alt="New image preview">
-                        <button type="button" id="remove-new-image" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold transition-colors">
-                            ×
-                        </button>
-                    </div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">This will replace the current image when you save</p>
-                </div>
 
                 <!-- New Image Upload -->
                 <div>
@@ -167,53 +153,6 @@
                     @enderror
                 </div>
 
-                <!-- Article Metadata -->
-                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-                    <h4 class="text-sm font-medium text-amber-800 dark:text-amber-200 mb-2 flex items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        Article Information
-                    </h4>
-                    <div class="text-sm text-amber-700 dark:text-amber-300 space-y-1">
-                        <div class="flex items-center">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                            <strong>Author:</strong> {{ $article->author->name }}
-                        </div>
-                        <div class="flex items-center">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4v10m6-10v10m-6 0h6"></path>
-                            </svg>
-                            <strong>Created:</strong> {{ $article->created_at->format('F j, Y \a\t g:i A') }}
-                        </div>
-                        <div class="flex items-center">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                            </svg>
-                            <strong>Last Updated:</strong> {{ $article->updated_at->format('F j, Y \a\t g:i A') }}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Live Preview -->
-                <div id="preview-section" class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                        </svg>
-                        Live Preview
-                    </h4>
-                    <div id="article-preview" class="bg-white dark:bg-gray-600 rounded-lg border border-gray-200 dark:border-gray-500 p-4">
-                        <h5 id="preview-title" class="font-bold text-lg text-gray-900 dark:text-gray-100 mb-2">{{ $article->title }}</h5>
-                        <div id="preview-content" class="text-gray-700 dark:text-gray-300 text-sm">
-                            {{ Str::limit($article->content, 200) }}...
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Form Actions -->
                 <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
                     <div class="flex items-center space-x-3">
@@ -237,6 +176,7 @@
                     </div>
                     
                     <button type="submit" 
+                            id="update-btn"
                             class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transform hover:-translate-y-0.5 transition-all duration-200">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -249,140 +189,211 @@
     </div>
 
     @push('scripts')
+    <!-- TinyMCE CDN -->
+    <script src="https://cdn.tiny.cloud/1/w0g30oweh2lt67fldc8svyzok04ltenzoby5l77pv10bk6oh/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+    
     <script>
-        // Image preview functionality
-        const imageInput = document.getElementById('image');
-        const newImagePreview = document.getElementById('new-image-preview');
-        const newImagePreviewContainer = document.getElementById('new-image-preview-container');
-        const currentImageSection = document.getElementById('current-image-section');
-        const uploadArea = document.getElementById('upload-area');
-        const removeNewImageBtn = document.getElementById('remove-new-image');
-        const removeCurrentImageBtn = document.getElementById('remove-current-image');
-
-        // Handle new image selection
-        imageInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                // Validate file type
-                if (!file.type.startsWith('image/')) {
-                    alert('Please select a valid image file.');
-                    imageInput.value = '';
-                    return;
-                }
-                
-                // Validate file size (2MB = 2 * 1024 * 1024 bytes)
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('File size must be less than 2MB.');
-                    imageInput.value = '';
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    newImagePreview.src = e.target.result;
-                    newImagePreviewContainer.classList.remove('hidden');
-                    console.log('New image selected:', file.name);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Remove new image functionality
-        if (removeNewImageBtn) {
-            removeNewImageBtn.addEventListener('click', function() {
-                imageInput.value = '';
-                newImagePreview.src = '';
-                newImagePreviewContainer.classList.add('hidden');
-            });
-        }
-
-        // Remove current image functionality
-        if (removeCurrentImageBtn) {
-            removeCurrentImageBtn.addEventListener('click', function() {
-                if (confirm('Are you sure you want to remove the current image? This cannot be undone.')) {
-                    currentImageSection.classList.add('hidden');
-                    // You could add a hidden input here to mark the image for deletion
-                    // For now, we'll just hide it visually
-                }
-            });
-        }
-
-        // Drag and drop functionality
-        uploadArea.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            uploadArea.classList.add('border-green-400', 'bg-green-50');
-        });
-
-        uploadArea.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            uploadArea.classList.remove('border-green-400', 'bg-green-50');
-        });
-
-        uploadArea.addEventListener('drop', function(e) {
-            e.preventDefault();
-            uploadArea.classList.remove('border-green-400', 'bg-green-50');
+        document.addEventListener('DOMContentLoaded', function() {
+            let editorInitialized = false;
             
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                imageInput.files = files;
-                imageInput.dispatchEvent(new Event('change'));
+            // Initialize TinyMCE with FIXED configuration
+            tinymce.init({
+                selector: '#content',
+                height: 500,
+                menubar: true,
+                // REMOVED 'template' plugin (deprecated in TinyMCE 7)
+                plugins: [
+                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                    'insertdatetime', 'media', 'table', 'help', 'wordcount', 'emoticons',
+                    'codesample'
+                ],
+                toolbar: 'undo redo | blocks | bold italic underline strikethrough | ' +
+                        'alignleft aligncenter alignright alignjustify | ' +
+                        'bullist numlist outdent indent | removeformat | help | ' +
+                        'link image media | table | code codesample | emoticons | fullscreen',
+                content_style: `
+                    body { 
+                        font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; 
+                        font-size: 14px; 
+                        line-height: 1.6;
+                        color: #374151;
+                    }
+                    h1, h2, h3, h4, h5, h6 { 
+                        color: #111827; 
+                        margin-top: 1rem; 
+                        margin-bottom: 0.5rem; 
+                    }
+                    p { margin-bottom: 1rem; }
+                    ul, ol { margin: 1rem 0; padding-left: 2rem; }
+                    blockquote { 
+                        border-left: 4px solid #3B82F6; 
+                        padding-left: 1rem; 
+                        margin: 1rem 0; 
+                        font-style: italic;
+                        background: #F3F4F6;
+                        padding: 1rem;
+                        border-radius: 0.375rem;
+                    }
+                `,
+                // Image upload configuration
+                images_upload_url: '/admin/upload-image',
+                automatic_uploads: true,
+                images_upload_base_path: '/storage/',
+                file_picker_types: 'image',
+                file_picker_callback: function(cb, value, meta) {
+                    if (meta.filetype === 'image') {
+                        let input = document.createElement('input');
+                        input.setAttribute('type', 'file');
+                        input.setAttribute('accept', 'image/*');
+                        
+                        input.addEventListener('change', function(e) {
+                            let file = e.target.files[0];
+                            
+                            let reader = new FileReader();
+                            reader.addEventListener('load', function () {
+                                let id = 'blobid' + (new Date()).getTime();
+                                let blobCache = tinymce.activeEditor.editorUpload.blobCache;
+                                let base64 = reader.result.split(',')[1];
+                                let blobInfo = blobCache.create(id, file, base64);
+                                blobCache.add(blobInfo);
+                                
+                                cb(blobInfo.blobUri(), { title: file.name });
+                            });
+                            reader.readAsDataURL(file);
+                        });
+                        
+                        input.click();
+                    }
+                },
+                setup: function(editor) {
+                    editor.on('init', function() {
+                        editorInitialized = true;
+                        console.log('TinyMCE initialized successfully');
+                    });
+                    
+                    editor.on('change', function() {
+                        if (editorInitialized) {
+                            startAutoSave();
+                        }
+                    });
+                },
+                // Disable analytics to prevent ad-blocker issues
+                analytics: {
+                    enabled: false
+                },
+                // Error handling
+                init_instance_callback: function(editor) {
+                    console.log('TinyMCE editor instance created:', editor.id);
+                }
+            }).catch(function(error) {
+                console.error('TinyMCE initialization failed:', error);
+                // Fallback: show textarea if TinyMCE fails
+                document.getElementById('content').style.display = 'block';
+            });
+
+            // Image preview functionality
+            const imageInput = document.getElementById('image');
+            const currentImageSection = document.getElementById('current-image-section');
+            const uploadArea = document.getElementById('upload-area');
+            const removeCurrentImageBtn = document.getElementById('remove-current-image');
+
+            // Handle new image selection
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    if (!file.type.startsWith('image/')) {
+                        alert('Please select a valid image file.');
+                        imageInput.value = '';
+                        return;
+                    }
+                    
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert('File size must be less than 2MB.');
+                        imageInput.value = '';
+                        return;
+                    }
+
+                    console.log('New image selected:', file.name);
+                }
+            });
+
+            // Remove current image functionality
+            if (removeCurrentImageBtn) {
+                removeCurrentImageBtn.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to remove the current image? This cannot be undone.')) {
+                        currentImageSection.classList.add('hidden');
+                    }
+                });
             }
-        });
 
-        // Live preview functionality
-        const titleInput = document.getElementById('title');
-        const contentInput = document.getElementById('content');
-        const previewTitle = document.getElementById('preview-title');
-        const previewContent = document.getElementById('preview-content');
-
-        function updatePreview() {
-            previewTitle.textContent = titleInput.value || 'Article Title';
-            const content = contentInput.value;
-            previewContent.textContent = content ? (content.length > 200 ? content.substring(0, 200) + '...' : content) : 'Article content will appear here...';
-        }
-
-        titleInput.addEventListener('input', updatePreview);
-        contentInput.addEventListener('input', updatePreview);
-
-        // Auto-save functionality
-        let autoSaveTimer;
-        
-        function autoSave() {
-            localStorage.setItem('edit_draft_title_' + {{ $article->id }}, titleInput.value);
-            localStorage.setItem('edit_draft_content_' + {{ $article->id }}, contentInput.value);
-            console.log('Changes auto-saved');
-        }
-        
-        [titleInput, contentInput].forEach(input => {
-            input.addEventListener('input', function() {
+            // Auto-save functionality with TinyMCE
+            let autoSaveTimer;
+            const titleInput = document.getElementById('title');
+            
+            function startAutoSave() {
                 clearTimeout(autoSaveTimer);
-                autoSaveTimer = setTimeout(autoSave, 2000);
-            });
-        });
-
-        // Clear auto-save on form submission
-        document.querySelector('form').addEventListener('submit', function() {
-            localStorage.removeItem('edit_draft_title_' + {{ $article->id }});
-            localStorage.removeItem('edit_draft_content_' + {{ $article->id }});
-        });
-
-        // Warn about unsaved changes
-        let hasUnsavedChanges = false;
-        [titleInput, contentInput, imageInput].forEach(input => {
-            input.addEventListener('input', function() {
-                hasUnsavedChanges = true;
-            });
-        });
-
-        window.addEventListener('beforeunload', function(e) {
-            if (hasUnsavedChanges) {
-                e.preventDefault();
-                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                autoSaveTimer = setTimeout(() => {
+                    if (editorInitialized && tinymce.get('content')) {
+                        localStorage.setItem('edit_draft_title_' + {{ $article->id }}, titleInput.value);
+                        localStorage.setItem('edit_draft_content_' + {{ $article->id }}, tinymce.get('content').getContent());
+                        console.log('Changes auto-saved');
+                    }
+                }, 2000);
             }
-        });
+            
+            titleInput.addEventListener('input', startAutoSave);
 
-        document.querySelector('form').addEventListener('submit', function() {
-            hasUnsavedChanges = false;
+            // Form submission handling
+            document.getElementById('article-edit-form').addEventListener('submit', function(e) {
+                // Ensure TinyMCE content is synced before submission
+                if (editorInitialized && tinymce.get('content')) {
+                    tinymce.get('content').save();
+                    
+                    const content = tinymce.get('content').getContent();
+                    
+                    if (!content.trim()) {
+                        e.preventDefault();
+                        alert('Please enter article content before submitting.');
+                        return false;
+                    }
+                    
+                    // Clear auto-save on successful submission
+                    localStorage.removeItem('edit_draft_title_' + {{ $article->id }});
+                    localStorage.removeItem('edit_draft_content_' + {{ $article->id }});
+                }
+            });
+
+            // Warn about unsaved changes
+            let hasUnsavedChanges = false;
+            [titleInput, imageInput].forEach(input => {
+                input.addEventListener('input', function() {
+                    hasUnsavedChanges = true;
+                });
+            });
+
+            // Track TinyMCE changes for unsaved warning
+            function setupUnsavedChangesTracking() {
+                if (editorInitialized && tinymce.get('content')) {
+                    tinymce.get('content').on('change', function() {
+                        hasUnsavedChanges = true;
+                    });
+                } else {
+                    setTimeout(setupUnsavedChangesTracking, 500);
+                }
+            }
+            setupUnsavedChangesTracking();
+
+            window.addEventListener('beforeunload', function(e) {
+                if (hasUnsavedChanges) {
+                    e.preventDefault();
+                    e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                }
+            });
+
+            document.querySelector('form').addEventListener('submit', function() {
+                hasUnsavedChanges = false;
+            });
         });
     </script>
     @endpush

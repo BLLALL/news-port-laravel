@@ -4,12 +4,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Category;
+use App\Services\NewsletterEmailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
-use App\Services\NewsletterEmailService;
 
 class ArticleController extends Controller
 {
@@ -136,5 +136,41 @@ class ArticleController extends Controller
         $article->delete();
 
         return redirect()->route('admin.articles.index')->with('success', 'Article deleted successfully!');
+    }
+
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        try {
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+
+                // Generate unique filename
+                $filename = time().'_'.$file->getClientOriginalName();
+
+                // Store in public storage under uploads/editor
+                $path = $file->storeAs('uploads/editor', $filename, 'public');
+
+                // Return TinyMCE expected response format
+                return response()->json([
+                    'location' => asset('storage/'.$path),
+                ]);
+            }
+
+            return response()->json(['error' => 'No file uploaded'], 400);
+
+        } catch (\Exception $e) {
+            Log::error('TinyMCE image upload failed', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id(),
+                'file_size' => $request->hasFile('file') ? $request->file('file')->getSize() : 0,
+                'file_type' => $request->hasFile('file') ? $request->file('file')->getMimeType() : null,
+            ]);
+
+            return response()->json(['error' => 'Upload failed'], 500);
+        }
     }
 }

@@ -56,6 +56,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', \App\Http\Middleware
     // Articles
     Route::resource('articles', App\Http\Controllers\Admin\ArticleController::class);
 
+    Route::post('/upload-image', [App\Http\Controllers\Admin\ArticleController::class, 'uploadImage'])->name('upload-image');
+
     Route::prefix('newsletter')->name('newsletter.')->group(function () {
         Route::get('/', [App\Http\Controllers\Admin\NewsletterController::class, 'index'])->name('index');
         Route::get('/export', [App\Http\Controllers\Admin\NewsletterController::class, 'export'])->name('export');
@@ -71,5 +73,21 @@ Route::prefix('newsletter')->name('newsletter.')->group(function () {
     Route::post('/send-test', [App\Http\Controllers\Admin\NewsletterController::class, 'sendTestNewsletter'])->name('send-test');
     Route::post('/send-article', [App\Http\Controllers\Admin\NewsletterController::class, 'sendNewsletterForArticle'])->name('send-article');
 });
+
+Route::get('/send-direct-newsletter', function () {
+    try {
+        $subscriber = \App\Models\NewsletterSubscription::where('email', 'bamer8353@gmail.com')->first();
+        $article = \App\Models\Article::with(['author', 'categories'])->latest()->first();
+
+        $notification = new \App\Notifications\NewArticleNewsletterNotification($article, $subscriber->email);
+
+        $subscriber->notify($notification);
+
+        return '✅ Newsletter sent directly! Check your email (including spam and promotions tab).';
+
+    } catch (\Exception $e) {
+        return '❌ Error: '.$e->getMessage();
+    }
+})->middleware('auth');
 
 require __DIR__.'/auth.php';

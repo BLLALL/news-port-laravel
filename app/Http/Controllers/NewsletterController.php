@@ -104,7 +104,7 @@ class NewsletterController extends Controller
     public function stats()
     {
         $stats = $this->newsletterService->getStatistics();
+
         return response()->json($stats);
     }
-
 }

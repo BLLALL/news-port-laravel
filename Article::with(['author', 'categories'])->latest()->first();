@@ -1,0 +1,14 @@
+[90m= [39m[34;4mApp\Models\NewsletterSubscription[39;24m {#6405
+    [34mid[39m: [35m132[39m,
+    [34memail[39m: "[32mbamer8353@gmail.com[39m",
+    [34memail_verified_at[39m: "[32m2025-07-07 09:09:37[39m",
+    [34mverification_token[39m: [36mnull[39m,
+    [34mis_active[39m: [35m1[39m,
+    [34mpreferences[39m: [36mnull[39m,
+    [34msource[39m: "[32mfooter[39m",
+    [34mip_address[39m: "[32m127.0.0.1[39m",
+    [34muser_agent[39m: "[32mMozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36[39m",
+    [34mcreated_at[39m: "[32m2025-07-07 09:09:37[39m",
+    [34mupdated_at[39m: "[32m2025-07-07 09:09:37[39m",
+  }
+

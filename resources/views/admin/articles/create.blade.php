@@ -8,7 +8,7 @@
     <div class="max-w-4xl mx-auto">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900 dark:text-gray-100">
-                <form action="{{ route('admin.articles.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <form action="{{ route('admin.articles.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="article-form">
                     @csrf
 
                     <!-- Title -->
@@ -28,22 +28,21 @@
                         @enderror
                     </div>
 
-                    <!-- Content -->
+                    <!-- Content with TinyMCE -->
                     <div>
                         <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Article Content *
                         </label>
                         <textarea id="content" 
                                   name="content" 
-                                  rows="15"
+                                  rows="20"
                                   placeholder="Write your article content here..."
-                                  required
                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-300">{{ old('content') }}</textarea>
                         @error('content')
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Write your article content in plain text or basic HTML.
+                            Use the rich text editor to format your content with headings, lists, links, and more.
                         </p>
                     </div>
 
@@ -99,9 +98,6 @@
                         @error('categories')
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Select at least one category for this article.
-                        </p>
                     </div>
 
                     <!-- Newsletter Section -->
@@ -120,17 +116,8 @@
                                     <label for="send_newsletter" class="text-sm font-medium text-blue-900 dark:text-blue-200">
                                         Send Newsletter to Subscribers
                                     </label>
-                                    <div class="text-sm text-blue-700 dark:text-blue-300 mt-1" id="newsletter-info">
-                                        <!-- This will be populated with subscriber count -->
-                                        <div class="flex items-center space-x-4">
-                                            <span>📧 This article will be sent to all active newsletter subscribers</span>
-                                            <span class="bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-medium" id="subscriber-count">
-                                                Loading...
-                                            </span>
-                                        </div>
-                                        <p class="mt-2 text-xs">
-                                            Uncheck this option if you don't want to notify subscribers about this article.
-                                        </p>
+                                    <div class="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                                        <span>📧 This article will be sent to all active newsletter subscribers</span>
                                     </div>
                                 </div>
                             </div>
@@ -144,20 +131,11 @@
                             Cancel
                         </a>
                         
-                        <div class="flex space-x-3">
-                            <button type="submit" 
-                                    name="action" 
-                                    value="save_draft"
-                                    class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                                Save as Draft
-                            </button>
-                            <button type="submit" 
-                                    name="action" 
-                                    value="publish"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                                Publish Article
-                            </button>
-                        </div>
+                        <button type="submit" 
+                                id="submit-btn"
+                                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                            Publish Article
+                        </button>
                     </div>
                 </form>
             </div>
@@ -165,72 +143,168 @@
     </div>
 
     @push('scripts')
+    <!-- TinyMCE CDN -->
+    <script src="https://cdn.tiny.cloud/1/w0g30oweh2lt67fldc8svyzok04ltenzoby5l77pv10bk6oh/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+    
     <script>
-        // Load newsletter subscriber count
         document.addEventListener('DOMContentLoaded', function() {
-            fetch('/newsletter/stats')
-                .then(response => response.json())
-                .then(data => {
-                    const subscriberCount = document.getElementById('subscriber-count');
-                    if (data.active_subscriptions) {
-                        subscriberCount.textContent = `${data.active_subscriptions} subscribers`;
-                    } else {
-                        subscriberCount.textContent = 'No subscribers';
+            let editorInitialized = false;
+            
+            // Initialize TinyMCE with FIXED configuration
+            tinymce.init({
+                selector: '#content',
+                height: 500,
+                menubar: true,
+                // REMOVED 'template' plugin (deprecated in TinyMCE 7)
+                plugins: [
+                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                    'insertdatetime', 'media', 'table', 'help', 'wordcount', 'emoticons',
+                    'codesample'
+                ],
+                toolbar: 'undo redo | blocks | bold italic underline strikethrough | ' +
+                        'alignleft aligncenter alignright alignjustify | ' +
+                        'bullist numlist outdent indent | removeformat | help | ' +
+                        'link image media | table | code codesample | emoticons | fullscreen',
+                content_style: `
+                    body { 
+                        font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; 
+                        font-size: 14px; 
+                        line-height: 1.6;
+                        color: #374151;
                     }
-                })
-                .catch(error => {
-                    console.error('Error loading subscriber count:', error);
-                    document.getElementById('subscriber-count').textContent = 'Unable to load';
-                });
-        });
+                    h1, h2, h3, h4, h5, h6 { 
+                        color: #111827; 
+                        margin-top: 1rem; 
+                        margin-bottom: 0.5rem; 
+                    }
+                    p { margin-bottom: 1rem; }
+                    ul, ol { margin: 1rem 0; padding-left: 2rem; }
+                    blockquote { 
+                        border-left: 4px solid #3B82F6; 
+                        padding-left: 1rem; 
+                        margin: 1rem 0; 
+                        font-style: italic;
+                        background: #F3F4F6;
+                        padding: 1rem;
+                        border-radius: 0.375rem;
+                    }
+                `,
+                // Image upload configuration
+                images_upload_url: '/admin/upload-image',
+                automatic_uploads: true,
+                images_upload_base_path: '/storage/',
+                file_picker_types: 'image',
+                file_picker_callback: function(cb, value, meta) {
+                    if (meta.filetype === 'image') {
+                        let input = document.createElement('input');
+                        input.setAttribute('type', 'file');
+                        input.setAttribute('accept', 'image/*');
+                        
+                        input.addEventListener('change', function(e) {
+                            let file = e.target.files[0];
+                            
+                            let reader = new FileReader();
+                            reader.addEventListener('load', function () {
+                                let id = 'blobid' + (new Date()).getTime();
+                                let blobCache = tinymce.activeEditor.editorUpload.blobCache;
+                                let base64 = reader.result.split(',')[1];
+                                let blobInfo = blobCache.create(id, file, base64);
+                                blobCache.add(blobInfo);
+                                
+                                cb(blobInfo.blobUri(), { title: file.name });
+                            });
+                            reader.readAsDataURL(file);
+                        });
+                        
+                        input.click();
+                    }
+                },
+                setup: function(editor) {
+                    editor.on('init', function() {
+                        editorInitialized = true;
+                        console.log('TinyMCE initialized successfully');
+                    });
+                    
+                    editor.on('change', function() {
+                        if (editorInitialized) {
+                            startAutoSave();
+                        }
+                    });
+                },
+                // Disable analytics to prevent ad-blocker issues
+                analytics: {
+                    enabled: false
+                },
+                // Error handling
+                init_instance_callback: function(editor) {
+                    console.log('TinyMCE editor instance created:', editor.id);
+                }
+            }).catch(function(error) {
+                console.error('TinyMCE initialization failed:', error);
+                // Fallback: show textarea if TinyMCE fails
+                document.getElementById('content').style.display = 'block';
+            });
 
-        // Preview selected image
-        document.getElementById('image').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    // You can add image preview functionality here
-                    console.log('Image selected:', file.name);
-                };
-                reader.readAsDataURL(file);
+            // Auto-save functionality
+            let autoSaveTimer;
+            const titleInput = document.getElementById('title');
+
+            function startAutoSave() {
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(() => {
+                    if (editorInitialized && tinymce.get('content')) {
+                        const formData = {
+                            title: titleInput.value,
+                            content: tinymce.get('content').getContent()
+                        };
+                        localStorage.setItem('article_draft', JSON.stringify(formData));
+                        console.log('Draft auto-saved');
+                    }
+                }, 5000);
             }
-        });
 
-        // Auto-save functionality (optional)
-        let autoSaveTimer;
-        const titleInput = document.getElementById('title');
-        const contentTextarea = document.getElementById('content');
+            titleInput.addEventListener('input', startAutoSave);
 
-        function startAutoSave() {
-            clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(() => {
-                // Implement auto-save to localStorage or draft endpoint
-                const formData = {
-                    title: titleInput.value,
-                    content: contentTextarea.value
-                };
-                localStorage.setItem('article_draft', JSON.stringify(formData));
-                console.log('Draft auto-saved');
-            }, 5000); // Auto-save every 5 seconds
-        }
+            // Form submission handling
+            document.getElementById('article-form').addEventListener('submit', function(e) {
+                // Ensure TinyMCE content is synced before submission
+                if (editorInitialized && tinymce.get('content')) {
+                    tinymce.get('content').save();
+                    
+                    // Remove required attribute temporarily to prevent validation error
+                    const contentTextarea = document.getElementById('content');
+                    const content = tinymce.get('content').getContent();
+                    
+                    if (!content.trim()) {
+                        e.preventDefault();
+                        alert('Please enter article content before submitting.');
+                        return false;
+                    }
+                    
+                    // Clear draft on successful submission
+                    localStorage.removeItem('article_draft');
+                }
+            });
 
-        titleInput.addEventListener('input', startAutoSave);
-        contentTextarea.addEventListener('input', startAutoSave);
-
-        // Load draft on page load
-        const savedDraft = localStorage.getItem('article_draft');
-        if (savedDraft && !titleInput.value && !contentTextarea.value) {
-            const draft = JSON.parse(savedDraft);
-            if (confirm('A draft was found. Would you like to restore it?')) {
-                titleInput.value = draft.title || '';
-                contentTextarea.value = draft.content || '';
+            // Load draft on page load
+            const savedDraft = localStorage.getItem('article_draft');
+            if (savedDraft && !titleInput.value) {
+                const draft = JSON.parse(savedDraft);
+                if (confirm('A draft was found. Would you like to restore it?')) {
+                    titleInput.value = draft.title || '';
+                    
+                    // Wait for TinyMCE to be ready before setting content
+                    function setTinyMCEContent() {
+                        if (editorInitialized && tinymce.get('content')) {
+                            tinymce.get('content').setContent(draft.content || '');
+                        } else {
+                            setTimeout(setTinyMCEContent, 500);
+                        }
+                    }
+                    setTinyMCEContent();
+                }
             }
-        }
-
-        // Clear draft when form is submitted
-        document.querySelector('form').addEventListener('submit', function() {
-            localStorage.removeItem('article_draft');
         });
     </script>
     @endpush

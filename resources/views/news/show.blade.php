@@ -132,7 +132,11 @@
                     <!-- Article Content -->
                     <div class="prose prose-lg dark:prose-invert max-w-none">
                         <div class="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
-                            {!! nl2br(e($article->content)) !!}
+                            <div class="prose prose-lg dark:prose-invert max-w-none">
+                                <div class="text-gray-700 dark:text-gray-300 leading-relaxed text-lg article-content">
+                                    {!! $article->content !!}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
